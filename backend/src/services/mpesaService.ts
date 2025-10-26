@@ -38,6 +38,11 @@ class MpesaService {
   }
 
   private async getAccessToken(): Promise<string> {
+    // Mock access token for development
+    if (process.env.NODE_ENV === 'development') {
+      return 'mock_access_token_' + Date.now();
+    }
+    
     const auth = Buffer.from(`${this.consumerKey}:${this.consumerSecret}`).toString('base64');
     
     try {
@@ -80,6 +85,24 @@ class MpesaService {
   }
 
   async initiateSTKPush(request: STKPushRequest): Promise<STKPushResponse> {
+    // Mock STK Push for development
+    if (process.env.NODE_ENV === 'development') {
+      const mockResponse: STKPushResponse = {
+        MerchantRequestID: 'mock_merchant_' + Date.now(),
+        CheckoutRequestID: 'mock_checkout_' + Date.now(),
+        ResponseCode: '0',
+        ResponseDescription: 'Success. Request accepted for processing',
+        CustomerMessage: 'Success. Request accepted for processing'
+      };
+      
+      // Simulate payment completion after 10 seconds
+      setTimeout(async () => {
+        await this.simulatePaymentCallback(mockResponse.CheckoutRequestID, true);
+      }, 10000);
+      
+      return mockResponse;
+    }
+    
     const accessToken = await this.getAccessToken();
     const timestamp = this.getTimestamp();
     const password = this.generatePassword();
@@ -213,6 +236,35 @@ class MpesaService {
 
   private generateSessionToken(): string {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  }
+  
+  // Mock payment callback simulation for development
+  private async simulatePaymentCallback(checkoutRequestId: string, success: boolean = true): Promise<void> {
+    if (process.env.NODE_ENV !== 'development') return;
+    
+    try {
+      const mockCallbackData = {
+        Body: {
+          stkCallback: {
+            CheckoutRequestID: checkoutRequestId,
+            ResultCode: success ? 0 : 1,
+            ResultDesc: success ? 'The service request is processed successfully.' : 'Payment failed',
+            CallbackMetadata: success ? {
+              Item: [
+                { Name: 'Amount', Value: 100 },
+                { Name: 'MpesaReceiptNumber', Value: 'MOCK' + Date.now() },
+                { Name: 'PhoneNumber', Value: '254700000000' }
+              ]
+            } : null
+          }
+        }
+      };
+      
+      await this.handleCallback(mockCallbackData);
+      console.log(`🎭 Mock payment ${success ? 'completed' : 'failed'} for checkout: ${checkoutRequestId}`);
+    } catch (error) {
+      console.error('Mock callback error:', error);
+    }
   }
 }
 

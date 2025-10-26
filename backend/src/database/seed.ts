@@ -7,24 +7,24 @@ async function main() {
   console.log('🌱 Seeding database...');
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10);
+  const hashedPassword = await bcrypt.hash('admin123', 10);
   
   const admin = await prisma.user.upsert({
-    where: { email: process.env.ADMIN_EMAIL || 'admin@collospot.com' },
+    where: { email: 'admin@collospot.com' },
     update: {},
     create: {
-      email: process.env.ADMIN_EMAIL || 'admin@collospot.com',
+      email: 'admin@collospot.com',
       phone: '+254700000000',
       password: hashedPassword,
-      firstName: 'System',
-      lastName: 'Administrator',
-      role: 'SUPER_ADMIN'
+      firstName: 'Admin',
+      lastName: 'User',
+      role: 'ADMIN'
     }
   });
 
   console.log('✅ Admin user created:', admin.email);
 
-  // Create sample plans
+  // Create default plans
   const plans = [
     {
       name: 'Basic 1 Hour',
@@ -44,7 +44,7 @@ async function main() {
     },
     {
       name: 'Premium 24 Hours',
-      description: 'Full day unlimited browsing',
+      description: 'Full day unlimited access',
       price: 300,
       duration: 24,
       dataLimit: '10GB',
@@ -52,7 +52,7 @@ async function main() {
     },
     {
       name: 'Weekly Package',
-      description: 'Best value for extended use',
+      description: 'Perfect for extended stays',
       price: 1500,
       duration: 168, // 7 days
       dataLimit: '50GB',
@@ -60,7 +60,7 @@ async function main() {
     },
     {
       name: 'Monthly Unlimited',
-      description: 'Unlimited internet for a full month',
+      description: 'Ultimate internet freedom',
       price: 5000,
       duration: 720, // 30 days
       dataLimit: 'Unlimited',
@@ -68,41 +68,26 @@ async function main() {
     }
   ];
 
-  for (const planData of plans) {
-    const plan = await prisma.plan.upsert({
-      where: { name: planData.name },
-      update: planData,
-      create: planData
-    });
+  // Delete existing plans and create new ones
+  await prisma.plan.deleteMany({});
+  
+  const createdPlans = await prisma.plan.createMany({
+    data: plans
+  });
+  
+  console.log(`✅ Created ${createdPlans.count} plans`);
+  
+  const allPlans = await prisma.plan.findMany();
+  allPlans.forEach(plan => {
     console.log('✅ Plan created:', plan.name);
-  }
+  });
 
-  // Create system config
-  const configs = [
-    { key: 'SYSTEM_NAME', value: 'COLLOSPOT' },
-    { key: 'SYSTEM_TAGLINE', value: 'Connect. Pay. Browse — Seamlessly.' },
-    { key: 'COMPANY_NAME', value: 'COLLOSPOT WiFi Solutions' },
-    { key: 'SUPPORT_PHONE', value: '+254700000000' },
-    { key: 'SUPPORT_EMAIL', value: 'support@collospot.com' },
-    { key: 'FREE_TRIAL_MINUTES', value: '15' },
-    { key: 'SESSION_WARNING_MINUTES', value: '10' }
-  ];
-
-  for (const config of configs) {
-    await prisma.systemConfig.upsert({
-      where: { key: config.key },
-      update: { value: config.value },
-      create: config
-    });
-  }
-
-  console.log('✅ System configuration created');
   console.log('🎉 Database seeded successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seeding failed:', e);
+    console.error('❌ Error seeding database:', e);
     process.exit(1);
   })
   .finally(async () => {

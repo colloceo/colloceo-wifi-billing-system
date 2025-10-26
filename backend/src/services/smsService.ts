@@ -1,4 +1,4 @@
-import AfricasTalking from 'africastalking';
+const AfricasTalking = require('africastalking');
 
 class SMSService {
   private sms: any;

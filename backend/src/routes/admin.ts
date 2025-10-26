@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticateToken, requireRole, AuthRequest } from '../middleware/auth';
 import { body, validationResult } from 'express-validator';
@@ -13,7 +13,7 @@ router.use(authenticateToken);
 router.use(requireRole(['ADMIN', 'SUPER_ADMIN']));
 
 // Dashboard stats
-router.get('/dashboard', async (req: AuthRequest, res) => {
+router.get('/dashboard', async (req: AuthRequest, res: Response) => {
   try {
     const [
       totalUsers,
@@ -59,7 +59,7 @@ router.get('/dashboard', async (req: AuthRequest, res) => {
 });
 
 // Get all users
-router.get('/users', async (req: AuthRequest, res) => {
+router.get('/users', async (req: AuthRequest, res: Response) => {
   try {
     const { page = 1, limit = 20, search } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
@@ -113,7 +113,7 @@ router.get('/users', async (req: AuthRequest, res) => {
 });
 
 // Get all plans
-router.get('/plans', async (req: AuthRequest, res) => {
+router.get('/plans', async (req: AuthRequest, res: Response) => {
   try {
     const plans = await prisma.plan.findMany({
       orderBy: { createdAt: 'desc' },
@@ -140,7 +140,7 @@ router.post('/plans', [
   body('duration').isInt({ min: 1 }).withMessage('Valid duration required'),
   body('dataLimit').notEmpty().withMessage('Data limit required'),
   body('speedLimit').notEmpty().withMessage('Speed limit required')
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -171,7 +171,7 @@ router.put('/plans/:id', [
   body('name').optional().notEmpty(),
   body('price').optional().isFloat({ min: 0 }),
   body('duration').optional().isInt({ min: 1 })
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -188,7 +188,7 @@ router.put('/plans/:id', [
 });
 
 // Delete plan
-router.delete('/plans/:id', async (req: AuthRequest, res) => {
+router.delete('/plans/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -204,7 +204,7 @@ router.delete('/plans/:id', async (req: AuthRequest, res) => {
 });
 
 // Get all sessions
-router.get('/sessions', async (req: AuthRequest, res) => {
+router.get('/sessions', async (req: AuthRequest, res: Response) => {
   try {
     const { page = 1, limit = 20, status } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
@@ -254,7 +254,7 @@ router.get('/sessions', async (req: AuthRequest, res) => {
 });
 
 // Terminate session
-router.post('/sessions/:id/terminate', async (req: AuthRequest, res) => {
+router.post('/sessions/:id/terminate', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -267,7 +267,7 @@ router.post('/sessions/:id/terminate', async (req: AuthRequest, res) => {
 });
 
 // Get payments
-router.get('/payments', async (req: AuthRequest, res) => {
+router.get('/payments', async (req: AuthRequest, res: Response) => {
   try {
     const { page = 1, limit = 20, status } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
@@ -316,7 +316,7 @@ router.get('/payments', async (req: AuthRequest, res) => {
 });
 
 // Get router status
-router.get('/router/status', async (req: AuthRequest, res) => {
+router.get('/router/status', async (req: AuthRequest, res: Response) => {
   try {
     const activeUsers = await mikrotikService.getActiveUsers();
     

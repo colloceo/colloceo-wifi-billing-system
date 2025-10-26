@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    email?: string;
+    email?: string | null;
     phone: string;
     role: string;
   };
@@ -22,7 +22,11 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res.status(500).json({ error: 'JWT_SECRET not configured' });
+    }
+    const decoded = jwt.verify(token, jwtSecret) as any;
     
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -33,7 +37,12 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       return res.status(401).json({ error: 'Invalid or inactive user' });
     }
 
-    req.user = user;
+    req.user = {
+      id: user.id,
+      email: user.email,
+      phone: user.phone,
+      role: user.role
+    };
     next();
   } catch (error) {
     return res.status(403).json({ error: 'Invalid token' });

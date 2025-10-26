@@ -90,6 +90,20 @@ npm run dev
 - **Admin Dashboard**: http://localhost:3000/admin
 - **API Documentation**: http://localhost:5000/health
 
+## 📱 Responsive Design
+
+The admin dashboard is fully responsive and optimized for:
+- **Mobile devices** (< 640px): Card-based layouts, touch-friendly interfaces
+- **Tablets** (640px - 1024px): Adaptive grids and navigation
+- **Desktop** (> 1024px): Full table views and multi-column layouts
+
+### Mobile Features
+- Collapsible sidebar navigation
+- Card-based data display replacing tables
+- Touch-optimized buttons and controls
+- Responsive pagination and filters
+- Optimized spacing and typography
+
 ## 📋 Configuration
 
 ### Environment Variables
@@ -162,11 +176,18 @@ The system uses Prisma ORM with the following main models:
 - **Payment**: M-Pesa transactions
 - **Voucher**: Prepaid codes (optional)
 
+### Responsive Breakpoints
+- **Mobile**: `< 640px` - Card layouts, stacked navigation
+- **Small**: `sm: ≥ 640px` - Improved spacing, inline elements
+- **Large**: `lg: ≥ 1024px` - Table views, sidebar navigation
+- **Extra Large**: `xl: ≥ 1280px` - Multi-column layouts
+
 ### Adding New Features
 1. Update Prisma schema in `backend/prisma/schema.prisma`
 2. Run `npm run db:generate` and `npm run db:push`
 3. Add API endpoints in `backend/src/routes/`
 4. Update frontend components in `frontend/src/`
+5. Ensure responsive design using Tailwind CSS breakpoints
 
 ## 🚀 Deployment
 

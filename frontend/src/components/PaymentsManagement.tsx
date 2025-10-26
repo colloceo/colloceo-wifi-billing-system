@@ -1,37 +1,33 @@
 import React, { useState, useEffect } from 'react'
-import { DollarSign, CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { DollarSign, Search, Filter, Download, Calendar, CreditCard } from 'lucide-react'
 import { adminAPI } from '../services/api'
-import { formatCurrency, formatDate, formatPaymentStatus, formatPhoneNumber } from '../utils/formatters'
+import { formatCurrency } from '../utils/formatters'
 import toast from 'react-hot-toast'
 import type { Payment, PaginatedResponse } from '../types'
 
 const PaymentsManagement: React.FC = () => {
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    pages: 0
-  })
+  const [totalPages, setTotalPages] = useState(1)
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
     fetchPayments()
-  }, [currentPage, filter])
+  }, [currentPage, statusFilter])
 
   const fetchPayments = async () => {
     try {
+      setLoading(true)
       const response = await adminAPI.getPayments({
         page: currentPage,
-        limit: 20,
-        status: filter === 'all' ? undefined : filter
+        limit: 10,
+        status: statusFilter === 'all' ? undefined : statusFilter
       })
       
       if (response.success && response.data) {
         setPayments(response.data.payments)
-        setPagination(response.data.pagination)
+        setTotalPages(response.data.pagination.pages)
       }
     } catch (error) {
       toast.error('Failed to load payments')
@@ -40,318 +36,273 @@ const PaymentsManagement: React.FC = () => {
     }
   }
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
-
-  const getStatusCounts = () => {
-    const completed = payments.filter(p => p.status === 'COMPLETED').length
-    const pending = payments.filter(p => p.status === 'PENDING').length
-    const failed = payments.filter(p => p.status === 'FAILED').length
-    const totalAmount = payments
-      .filter(p => p.status === 'COMPLETED')
-      .reduce((sum, p) => sum + p.amount, 0)
-    return { completed, pending, failed, totalAmount }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return <CheckCircle className="w-5 h-5 text-green-600" />
-      case 'PENDING':
-        return <Clock className="w-5 h-5 text-yellow-600" />
-      case 'FAILED':
-        return <XCircle className="w-5 h-5 text-red-600" />
-      default:
-        return <CreditCard className="w-5 h-5 text-gray-600" />
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed': return 'bg-green-100 text-green-900 border border-green-200'
+      case 'pending': return 'bg-yellow-100 text-yellow-900 border border-yellow-200'
+      case 'failed': return 'bg-red-100 text-red-900 border border-red-200'
+      case 'cancelled': return 'bg-gray-100 text-gray-900 border border-gray-200'
+      default: return 'bg-gray-100 text-gray-900 border border-gray-200'
     }
   }
 
-  if (loading && payments.length === 0) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Payments Management</h1>
-        </div>
-        <div className="card">
-          <div className="animate-pulse space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4 p-4">
-                <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const statusCounts = getStatusCounts()
+  const totalRevenue = payments
+    .filter(p => p.status === 'COMPLETED')
+    .reduce((sum, p) => sum + p.amount, 0)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Payments Management</h1>
-          <p className="text-gray-600">Monitor and track all payment transactions</p>
+          <h1 className="text-3xl font-bold text-gray-900">Payments</h1>
+          <p className="text-gray-600 mt-1">Track and manage all payment transactions</p>
         </div>
+        <button className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors shadow-sm">
+          <Download className="w-4 h-4 mr-2" />
+          Export Report
+        </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-gray-900">{statusCounts.completed}</p>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 h-32 flex items-center">
+          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+            <DollarSign className="w-6 h-6 text-green-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-600 truncate">Total Revenue</p>
+            <p className="text-2xl font-bold text-gray-900 truncate">{formatCurrency(totalRevenue)}</p>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Clock className="w-6 h-6 text-yellow-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-gray-900">{statusCounts.pending}</p>
-            </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-6 h-32 flex items-center">
+          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+            <CreditCard className="w-6 h-6 text-blue-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-600 truncate">Total Payments</p>
+            <p className="text-2xl font-bold text-gray-900">{payments.length}</p>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <XCircle className="w-6 h-6 text-red-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Failed</p>
-              <p className="text-2xl font-bold text-gray-900">{statusCounts.failed}</p>
-            </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6 h-32 flex items-center">
+          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+            <Calendar className="w-6 h-6 text-yellow-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-600 truncate">Pending</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {payments.filter(p => p.status === 'PENDING').length}
+            </p>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <DollarSign className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(statusCounts.totalAmount)}</p>
-            </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6 h-32 flex items-center">
+          <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+            <span className="text-red-600 font-bold text-lg">✗</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-600 truncate">Failed</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {payments.filter(p => p.status === 'FAILED').length}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="card">
-        <div className="flex space-x-4">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'all' 
-                ? 'bg-primary-100 text-primary-700' 
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            All Payments
-          </button>
-          <button
-            onClick={() => setFilter('COMPLETED')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'COMPLETED' 
-                ? 'bg-green-100 text-green-700' 
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Completed
-          </button>
-          <button
-            onClick={() => setFilter('PENDING')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'PENDING' 
-                ? 'bg-yellow-100 text-yellow-700' 
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Pending
-          </button>
-          <button
-            onClick={() => setFilter('FAILED')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === 'FAILED' 
-                ? 'bg-red-100 text-red-700' 
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Failed
-          </button>
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="w-full sm:w-64">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value)
+                setCurrentPage(1)
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">All Payments</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="PENDING">Pending</option>
+              <option value="FAILED">Failed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Payments Table */}
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Transaction
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Plan
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Receipt
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {payments.map((payment) => {
-                const status = formatPaymentStatus(payment.status)
-                
-                return (
-                  <tr key={payment.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                          {getStatusIcon(payment.status)}
-                        </div>
-                        <div className="ml-4">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-semibold text-gray-900">Payment History</h3>
+        </div>
+        
+        {loading ? (
+          <div className="p-8 sm:p-12 text-center">
+            <div className="loading-spinner mx-auto"></div>
+            <p className="text-gray-500 mt-4">Loading payments...</p>
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Transaction</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Customer</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Plan</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Method</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {payments.map((payment) => (
+                    <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div>
                           <div className="text-sm font-medium text-gray-900">
                             {payment.id.slice(0, 8)}...
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {payment.paymentMethod}
+                          {payment.mpesaReceiptNumber && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Receipt: {payment.mpesaReceiptNumber}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {payment.user?.firstName && payment.user?.lastName 
+                              ? `${payment.user.firstName} ${payment.user.lastName}`
+                              : payment.user?.phone || 'Unknown'
+                            }
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {payment.user?.phone}
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {payment.plan?.name || 'Unknown Plan'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-semibold text-gray-900">
+                          {formatCurrency(payment.amount)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-sm text-gray-700">
+                          <span className="mr-2">📱</span>
+                          {payment.paymentMethod}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
+                          {payment.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {new Date(payment.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {new Date(payment.createdAt).toLocaleTimeString()}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Mobile Cards */}
+            <div className="lg:hidden divide-y divide-gray-100">
+              {payments.map((payment) => (
+                <div key={payment.id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">
                         {payment.user?.firstName && payment.user?.lastName 
                           ? `${payment.user.firstName} ${payment.user.lastName}`
-                          : 'Unknown User'
+                          : payment.user?.phone || 'Unknown'
                         }
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {formatPhoneNumber(payment.user?.phone || '')}
+                      <div className="text-xs text-gray-500 mt-1">
+                        {payment.user?.phone}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {payment.plan?.name || 'Unknown Plan'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-lg font-bold text-gray-900">
-                        {formatCurrency(payment.amount)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={status.className}>
-                        {status.text}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="space-y-1">
-                        <div>Created: {formatDate(payment.createdAt)}</div>
-                        {payment.updatedAt !== payment.createdAt && (
-                          <div>Updated: {formatDate(payment.updatedAt)}</div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {payment.mpesaReceiptNumber ? (
-                        <div className="bg-green-50 text-green-800 px-2 py-1 rounded text-xs font-mono">
-                          {payment.mpesaReceiptNumber}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">-</span>
+                    </div>
+                    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
+                      {payment.status}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="text-gray-500 text-xs">Plan</div>
+                      <div className="font-medium text-gray-900">{payment.plan?.name || 'Unknown Plan'}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500 text-xs">Amount</div>
+                      <div className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500 text-xs">Method</div>
+                      <div className="text-gray-700">📱 {payment.paymentMethod}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500 text-xs">Date</div>
+                      <div className="text-gray-700">{new Date(payment.createdAt).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <div className="text-xs text-gray-500">
+                      Transaction: {payment.id.slice(0, 8)}...
+                      {payment.mpesaReceiptNumber && (
+                        <span className="ml-2">Receipt: {payment.mpesaReceiptNumber}</span>
                       )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
-        {payments.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No payments found</h3>
-            <p className="text-gray-600">
-              {filter === 'all' 
-                ? 'Payments will appear here once customers make purchases'
-                : `No ${filter.toLowerCase()} payments found`
-              }
-            </p>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Pagination */}
-      {pagination.pages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-            {pagination.total} results
-          </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page === 1}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-            {[...Array(Math.min(5, pagination.pages))].map((_, i) => {
-              const page = i + 1
-              return (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    page === pagination.page
-                      ? 'bg-primary-600 text-white'
-                      : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {page}
-                </button>
-              )
-            })}
-            <button
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page === pagination.pages}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

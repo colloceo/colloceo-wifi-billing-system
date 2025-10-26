@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -14,7 +14,7 @@ model User {
   password    String?
   firstName   String?
   lastName    String?
-  role        UserRole @default(CUSTOMER)
+  role        String   @default("CUSTOMER")
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -52,7 +52,7 @@ model Session {
   ipAddress       String?
   startTime       DateTime      @default(now())
   endTime         DateTime?
-  status          SessionStatus @default(ACTIVE)
+  status          String        @default("ACTIVE")
   dataUsed        BigInt        @default(0)
   sessionToken    String        @unique
   routerSessionId String?
@@ -70,7 +70,7 @@ model Payment {
   amount              Float
   mpesaReceiptNumber  String?
   checkoutRequestId   String?       @unique
-  status              PaymentStatus @default(PENDING)
+  status              String        @default("PENDING")
   paymentMethod       String        @default("MPESA")
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
@@ -105,23 +105,7 @@ model SystemConfig {
   @@map("system_config")
 }
 
-enum UserRole {
-  CUSTOMER
-  ADMIN
-  SUPER_ADMIN
-  TECHNICIAN
-  SUPPORT
-}
-
-enum SessionStatus {
-  ACTIVE
-  EXPIRED
-  TERMINATED
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  CANCELLED
-}
+// Enums replaced with strings for SQLite compatibility
+// UserRole: CUSTOMER, ADMIN, SUPER_ADMIN, TECHNICIAN, SUPPORT
+// SessionStatus: ACTIVE, EXPIRED, TERMINATED  
+// PaymentStatus: PENDING, COMPLETED, FAILED, CANCELLED

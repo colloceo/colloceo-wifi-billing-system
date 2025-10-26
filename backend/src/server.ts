@@ -30,7 +30,11 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // Higher limit for development
+  skip: (req) => {
+    // Skip rate limiting for auth endpoints in development
+    return process.env.NODE_ENV === 'development' && req.path.includes('/auth/');
+  }
 });
 app.use(limiter);
 

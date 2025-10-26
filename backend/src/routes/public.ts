@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -11,7 +11,7 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 // Get all active plans
-router.get('/plans', async (req, res) => {
+router.get('/plans', async (req: Request, res: Response) => {
   try {
     const plans = await prisma.plan.findMany({
       where: { isActive: true },
@@ -30,7 +30,7 @@ router.post('/register', [
   body('email').optional().isEmail().withMessage('Valid email required'),
   body('firstName').optional().isLength({ min: 2 }).withMessage('First name must be at least 2 characters'),
   body('lastName').optional().isLength({ min: 2 }).withMessage('Last name must be at least 2 characters')
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -68,10 +68,14 @@ router.post('/register', [
     });
 
     // Generate JWT token
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET not configured');
+    }
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      jwtSecret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
     );
 
     // Send welcome SMS
@@ -99,7 +103,7 @@ router.post('/register', [
 // Login user
 router.post('/login', [
   body('phone').isMobilePhone('any').withMessage('Valid phone number required')
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -116,10 +120,14 @@ router.post('/login', [
       return res.status(401).json({ success: false, error: 'User not found or inactive' });
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET not configured');
+    }
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      jwtSecret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
     );
 
     res.json({
@@ -146,7 +154,7 @@ router.post('/payment', [
   body('phone').isMobilePhone('any').withMessage('Valid phone number required'),
   body('planId').isUUID().withMessage('Valid plan ID required'),
   body('amount').isFloat({ min: 1 }).withMessage('Valid amount required')
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -218,7 +226,7 @@ router.post('/payment', [
 });
 
 // Check payment status
-router.get('/payment/status/:checkoutRequestId', async (req, res) => {
+router.get('/payment/status/:checkoutRequestId', async (req: Request, res: Response) => {
   try {
     const { checkoutRequestId } = req.params;
 
@@ -271,7 +279,7 @@ router.get('/payment/status/:checkoutRequestId', async (req, res) => {
 // Connect to internet
 router.post('/connect', [
   body('sessionToken').notEmpty().withMessage('Session token required')
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const { sessionToken } = req.body;
 
@@ -299,7 +307,7 @@ router.post('/connect', [
 });
 
 // M-Pesa callback
-router.post('/payment/mpesa/callback', async (req, res) => {
+router.post('/payment/mpesa/callback', async (req: Request, res: Response) => {
   try {
     await mpesaService.handleCallback(req.body);
     res.json({ success: true });

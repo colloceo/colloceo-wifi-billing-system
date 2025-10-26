@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "COLLOSPOT WiFi Billing System Frontend",
   "private": true,
+  "type": "module",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -29,6 +30,7 @@
     "@types/qrcode.react": "^1.0.5"
   },
   "scripts": {
+    "start": "vite",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
