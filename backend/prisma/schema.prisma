@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String?  @unique
+  phone       String   @unique
+  password    String?
+  firstName   String?
+  lastName    String?
+  role        UserRole @default(CUSTOMER)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sessions    Session[]
+  payments    Payment[]
+  vouchers    Voucher[]
+  
+  @@map("users")
+}
+
+model Plan {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  duration    Int      // in hours
+  dataLimit   String   // e.g., "1GB", "unlimited"
+  speedLimit  String   // e.g., "10Mbps"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sessions    Session[]
+  payments    Payment[]
+  
+  @@map("plans")
+}
+
+model Session {
+  id              String        @id @default(uuid())
+  userId          String
+  planId          String
+  macAddress      String?
+  ipAddress       String?
+  startTime       DateTime      @default(now())
+  endTime         DateTime?
+  status          SessionStatus @default(ACTIVE)
+  dataUsed        BigInt        @default(0)
+  sessionToken    String        @unique
+  routerSessionId String?
+  
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
+  
+  @@map("sessions")
+}
+
+model Payment {
+  id                  String        @id @default(uuid())
+  userId              String
+  planId              String
+  amount              Float
+  mpesaReceiptNumber  String?
+  checkoutRequestId   String?       @unique
+  status              PaymentStatus @default(PENDING)
+  paymentMethod       String        @default("MPESA")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
+  
+  @@map("payments")
+}
+
+model Voucher {
+  id          String        @id @default(uuid())
+  code        String        @unique
+  planId      String?
+  userId      String?
+  amount      Float?
+  isRedeemed  Boolean       @default(false)
+  redeemedAt  DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime      @default(now())
+  
+  user User? @relation(fields: [userId], references: [id])
+  
+  @@map("vouchers")
+}
+
+model SystemConfig {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+  
+  @@map("system_config")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+  TECHNICIAN
+  SUPPORT
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
