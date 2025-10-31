@@ -105,14 +105,14 @@ const PlansManagement: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Plans</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-indigo-900 to-purple-900 bg-clip-text text-transparent">Plans Management</h1>
           <p className="text-gray-600 mt-1">Create and manage internet packages</p>
         </div>
         <button
           onClick={handleCreatePlan}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Plan
@@ -135,16 +135,18 @@ const PlansManagement: React.FC = () => {
           ))
         ) : (
           plans.map((plan) => (
-            <div key={plan.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-4">
+            <div key={plan.id} className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+              <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
-                    <Zap className="w-5 h-5 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                    <Zap className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{plan.name}</h3>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      plan.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border ${
+                      plan.isActive 
+                        ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200' 
+                        : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-200'
                     }`}>
                       {plan.isActive ? 'Active' : 'Inactive'}
                     </span>
@@ -153,41 +155,60 @@ const PlansManagement: React.FC = () => {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEditPlan(plan)}
-                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
                   >
-                    <Edit className="w-4 h-4" />
+                    <Edit className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDeletePlan(plan.id)}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              <div className="text-2xl font-bold text-blue-600 mb-4">
-                {formatCurrency(plan.price)}
-                <span className="text-sm text-gray-500 font-normal">/{formatDuration(plan.duration)}</span>
+              <div className="text-center mb-6">
+                <div className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  {formatCurrency(plan.price)}
+                </div>
+                <div className="text-sm text-gray-500 font-medium mt-1">per {formatDuration(plan.duration)}</div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center text-sm text-gray-600">
-                  <Zap className="w-4 h-4 mr-2 text-green-500" />
-                  Speed: {plan.speedLimit}
+              <div className="space-y-4">
+                <div className="flex items-center p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100">
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center mr-3">
+                    <Zap className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-emerald-600 font-medium">Speed</div>
+                    <div className="text-sm font-semibold text-gray-900">{plan.speedLimit}</div>
+                  </div>
                 </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <Download className="w-4 h-4 mr-2 text-blue-500" />
-                  Data: {plan.dataLimit}
+                <div className="flex items-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mr-3">
+                    <Download className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-blue-600 font-medium">Data Limit</div>
+                    <div className="text-sm font-semibold text-gray-900">{plan.dataLimit}</div>
+                  </div>
                 </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <Clock className="w-4 h-4 mr-2 text-purple-500" />
-                  Duration: {formatDuration(plan.duration)}
+                <div className="flex items-center p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-3">
+                    <Clock className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-purple-600 font-medium">Duration</div>
+                    <div className="text-sm font-semibold text-gray-900">{formatDuration(plan.duration)}</div>
+                  </div>
                 </div>
               </div>
 
               {plan.description && (
-                <p className="text-sm text-gray-500 mt-3">{plan.description}</p>
+                <div className="mt-4 p-3 bg-gray-50 rounded-xl">
+                  <p className="text-sm text-gray-600 italic">{plan.description}</p>
+                </div>
               )}
             </div>
           ))

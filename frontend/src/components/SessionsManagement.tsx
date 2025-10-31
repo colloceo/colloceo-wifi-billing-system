@@ -136,8 +136,8 @@ const SessionsManagement: React.FC = () => {
                     <tr key={session.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
-                            <User className="w-5 h-5 text-white" />
+                          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                            <User className="w-6 h-6 text-white" />
                           </div>
                           <div>
                             <div className="text-sm font-medium text-gray-900">
@@ -161,7 +161,11 @@ const SessionsManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full ${getStatusColor(session.status)}`}>
+                        <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border ${
+                          session.status === 'ACTIVE' ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200' :
+                          session.status === 'EXPIRED' ? 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200' :
+                          'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-200'
+                        }`}>
                           {session.status}
                         </span>
                       </td>
@@ -202,8 +206,8 @@ const SessionsManagement: React.FC = () => {
                 <div key={session.id} className="p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center flex-1">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
-                        <User className="w-6 h-6 text-white" />
+                      <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                        <User className="w-7 h-7 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-gray-900 truncate">
@@ -217,7 +221,11 @@ const SessionsManagement: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(session.status)}`}>
+                    <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border ${
+                      session.status === 'ACTIVE' ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200' :
+                      session.status === 'EXPIRED' ? 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200' :
+                      'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-200'
+                    }`}>
                       {session.status}
                     </span>
                   </div>

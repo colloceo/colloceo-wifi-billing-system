@@ -53,12 +53,12 @@ const PaymentsManagement: React.FC = () => {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Payments</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-indigo-900 to-purple-900 bg-clip-text text-transparent">Payments Management</h1>
           <p className="text-gray-600 mt-1">Track and manage all payment transactions</p>
         </div>
-        <button className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors shadow-sm">
+        <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-sm font-semibold rounded-xl hover:from-emerald-700 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl">
           <Download className="w-4 h-4 mr-2" />
           Export Report
         </button>
@@ -66,44 +66,64 @@ const PaymentsManagement: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6 h-32 flex items-center">
-          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-            <DollarSign className="w-6 h-6 text-green-600" />
+        <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl border border-emerald-100 p-6 hover:shadow-xl hover:scale-105 transition-all duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+              <DollarSign className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">
+              Total
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-600 truncate">Total Revenue</p>
-            <p className="text-2xl font-bold text-gray-900 truncate">{formatCurrency(totalRevenue)}</p>
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Total Revenue</p>
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalRevenue)}</p>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg border border-gray-200 p-6 h-32 flex items-center">
-          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-            <CreditCard className="w-6 h-6 text-blue-600" />
+        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-100 p-6 hover:shadow-xl hover:scale-105 transition-all duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+              <CreditCard className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+              Count
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-600 truncate">Total Payments</p>
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Total Payments</p>
             <p className="text-2xl font-bold text-gray-900">{payments.length}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-6 h-32 flex items-center">
-          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-            <Calendar className="w-6 h-6 text-yellow-600" />
+        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl border border-amber-100 p-6 hover:shadow-xl hover:scale-105 transition-all duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-lg">
+              <Calendar className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+              Pending
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-600 truncate">Pending</p>
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Pending</p>
             <p className="text-2xl font-bold text-gray-900">
               {payments.filter(p => p.status === 'PENDING').length}
             </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-6 h-32 flex items-center">
-          <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-            <span className="text-red-600 font-bold text-lg">✗</span>
+        <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl border border-red-100 p-6 hover:shadow-xl hover:scale-105 transition-all duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-lg">✗</span>
+            </div>
+            <div className="text-xs font-semibold px-2 py-1 rounded-full bg-red-100 text-red-700">
+              Failed
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-600 truncate">Failed</p>
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Failed</p>
             <p className="text-2xl font-bold text-gray-900">
               {payments.filter(p => p.status === 'FAILED').length}
             </p>
@@ -112,17 +132,17 @@ const PaymentsManagement: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl p-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="w-full sm:w-64">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">Filter by Status</label>
             <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value)
                 setCurrentPage(1)
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium"
             >
               <option value="all">All Payments</option>
               <option value="COMPLETED">Completed</option>
@@ -135,9 +155,14 @@ const PaymentsManagement: React.FC = () => {
       </div>
 
       {/* Payments Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-lg font-semibold text-gray-900">Payment History</h3>
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+              <DollarSign className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">Payment History</h3>
+          </div>
         </div>
         
         {loading ? (

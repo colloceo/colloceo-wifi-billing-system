@@ -45,30 +45,30 @@ const UsersManagement: React.FC = () => {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-          <p className="text-gray-600 mt-1">Manage customer accounts and activity</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-indigo-900 to-purple-900 bg-clip-text text-transparent">Users Management</h1>
+          <p className="text-gray-600 mt-1">Manage customer accounts and monitor activity</p>
         </div>
-        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+        <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
           Export Users
         </button>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl p-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder="Search users by name, phone, or email..."
               value={searchTerm}
               onChange={handleSearch}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border-0 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all placeholder-gray-500"
             />
           </div>
-          <button className="inline-flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+          <button className="inline-flex items-center justify-center px-6 py-3.5 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:from-gray-100 hover:to-gray-200 transition-all duration-200">
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </button>
@@ -76,9 +76,14 @@ const UsersManagement: React.FC = () => {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-lg font-semibold text-gray-900">All Users</h3>
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/50 shadow-xl overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+              <Users className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">All Users</h3>
+          </div>
         </div>
         
         {loading ? (
@@ -105,8 +110,8 @@ const UsersManagement: React.FC = () => {
                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
-                            <span className="text-white font-bold text-sm">
+                          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                            <span className="text-white font-bold">
                               {(user.firstName || user.phone)[0].toUpperCase()}
                             </span>
                           </div>
@@ -133,10 +138,10 @@ const UsersManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border ${
+                        <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full ${
                           user.isActive 
-                            ? 'bg-green-100 text-green-900 border-green-200' 
-                            : 'bg-red-100 text-red-900 border-red-200'
+                            ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border border-emerald-200' 
+                            : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200'
                         }`}>
                           {user.isActive ? 'Active' : 'Inactive'}
                         </span>
@@ -167,8 +172,8 @@ const UsersManagement: React.FC = () => {
                 <div key={user.id} className="p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center flex-1">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white font-bold">
+                      <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                        <span className="text-white font-bold text-lg">
                           {(user.firstName || user.phone)[0].toUpperCase()}
                         </span>
                       </div>
@@ -189,10 +194,10 @@ const UsersManagement: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex flex-col items-end space-y-2">
-                      <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border ${
+                      <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full ${
                         user.isActive 
-                          ? 'bg-green-100 text-green-900 border-green-200' 
-                          : 'bg-red-100 text-red-900 border-red-200'
+                          ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border border-emerald-200' 
+                          : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200'
                       }`}>
                         {user.isActive ? 'Active' : 'Inactive'}
                       </span>
